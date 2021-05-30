@@ -41,11 +41,11 @@ This will install all required the dependencies for you as well as the entire pr
 
 ## Supported Rule Extraction Methods
 Currently, we support the following algorithms for extracting rule sets from DNNs:
-1. DeepRED (Zilke et al. 2016): We support a variation of the DeepRED algorithm in which we use C5.0 rather than C4.5 for intermediate rule extraction.
-2. REM-D (Shams et al. 2020): This implementation is based on the original REM-D implementation by Shams et al. but includes several optimizations including multi-threading.
-3. REM-T (Shams et al. 2020): This method allows you to extract rule sets from random forests or plain decision trees trained on a given task.
-4. ECLAIRE (Espinosa-Zarlenga et al. 2021): Efficient CLAuse-wIse Rule Extraction allows you to extract rules from a DNN in a much more scalable way than REM-D/DeepRED while generally producing better performing and smaller rule sets. If working with large models or training sets, we strongly recommend using this method over REM-D or DeepRED as those can lead to intractable runtimes in complex models.
-
+1. [DeepRED](https://link.springer.com/chapter/10.1007/978-3-319-46307-0_29) (Zilke et al. 2016): We support a variation of the DeepRED algorithm in which we use C5.0 rather than C4.5 for intermediate rule extraction. This results in generally better and smaller rule sets than those extracted by the original DeepRED algorithm.
+2. [REM-D](https://www.biorxiv.org/content/10.1101/2021.01.22.427799v2.abstract) (Shams et al. 2020): This implementation is based on the original REM-D implementation by Shams et al. but includes several optimizations including multi-threading.
+3. ECLAIRE (Espinosa-Zarlenga et al. 2021, publication pre-print in progress): Efficient CLAuse-wIse Rule Extraction allows you to extract rules from a DNN in a much more scalable way than REM-D/DeepRED while generally producing better performing and smaller rule sets. If working with large models or training sets, we strongly recommend using this method over REM-D or DeepRED as otherwise you may be prone to getting intractable runtimes in complex models.
+4. PedC5.0 (Kola et al. 2020): Simple pedagogical rule extraction method in which C5.0 is used to approximate the output of a DNN using its input features.
+5. [REM-T](https://www.biorxiv.org/content/10.1101/2021.01.22.427799v2.abstract) (Shams et al. 2020): This method allows you to extract rule sets from random forests or plain decision trees trained on a given task. As opposed to all other methods, this algorithm does not require a DNN and instead requires true labels for its training samples.
 ## Extracting Rules from Models
 
 You can use a series of rule extraction algorithms with any custom Keras model trained on a **classification** task. To do this, you can import the following method once you have installed this package as instructed in the setup:
@@ -56,6 +56,7 @@ from remix import eclaire # Or rem_d, pedagogical, rem_t, deep_red_c5
 X_train, y_train = ...
 # Train a Keras model on this data
 keras_model = ...
+
 # Extract rules from that trained model
 ruleset = eclaire.extract_rules(keras_model, X_train)
 # And try and make predictions using this ruleset
@@ -67,8 +68,7 @@ y_pred = ruleset.predict(X_test)
 # `scores` is a vector containing their corresponding aggregated scores.
 y_pred, explanations, scores = ruleset.predict_and_explain(X_test)
 
-
-# You also can see the learned ruleset by printing it
+# You can also see the learned ruleset by printing it
 print(ruleset)
 ```
 All of the methods we support have the same signature where the first argument must be a trained Keras Model object and the second argument must be a 2D np.ndarray with shape `[N, F]` containing `N` training samples such that each sample has `F` features in it. Note that most of these methods are able to take a variety of hyper-parameters (e.g., the number of minimum samples required for making a new split in a decision tree can be passed via the `min_cases` arguments or the number of threads to use `num_workers`). For a full list of the hyper-parameters supported for a specific method, together with their semantics, please refer to that method's own documentation in [remix/extract_rules](remix/extract_rules).
