@@ -1,0 +1,94 @@
+dataset_file: datasets/LetterRecognitionComplete/data.csv
+dataset_name: LetterRecognitionComplete
+evaluate_num_workers: 6
+extractor_params:
+  balance_classes: true
+  block_size: 1
+  ccp_prune: true
+  ecclectic: false
+  estimators: 10
+  final_algorithm_name: C5.0
+  final_tree_max_depth: 10
+  initial_drop_percent: null
+  initial_min_cases: null
+  intermediate_algorithm_name: C5.0
+  intermediate_drop_percent: 0
+  intermediate_end_min_cases: null
+  intermediate_tree_max_depth: 15
+  max_number_of_samples: null
+  merge_repeated_terms: true
+  min_cases: 5
+  min_confidence: 0
+  num_workers: 6
+  preemptive_redundant_removal: false
+  rule_score_mechanism: Accuracy
+  threshold_decimals: null
+  top_k_activations: 1
+  tree_extraction_algorithm_name: C5.0
+  tree_max_depth: 10
+  trials: 1
+  winnow_features: true
+  winnow_intermediate: true
+force_rerun: null
+grid_search_params:
+  activations:
+  - tanh
+  - elu
+  batch_sizes:
+  - 16
+  - 32
+  dropout_rates:
+  - 0
+  - 0.2
+  enable: false
+  epochs:
+  - 50
+  - 100
+  - 150
+  layer_sizes:
+  - - 128
+    - 64
+    - 32
+  - - 64
+    - 32
+  learning_rates:
+  - 0.001
+  - 0.0001
+  loss_functions:
+  - softmax_xentr
+  - sigmoid_xentr
+  metric_name: accuracy
+hyperparameters:
+  activation: elu
+  batch_size: 32
+  compress_mechanism: null
+  compression_params:
+    initial_sparsity: 0.0
+    pruning_epochs: 20
+    target_sparsity: 0.75
+  dropout_rate: 0
+  early_stopping_params:
+    min_delta: 0.001
+    mode: min
+    monitor: loss
+    patience: 15
+    validation_percent: 0.1
+  epochs: 150
+  last_activation: softmax
+  layer_units:
+  - 128
+  - 64
+  learning_rate: 0.001
+  loss_function: softmax_xentr
+  optimizer_params:
+    decay_rate: 1
+    decay_steps: 1
+  skip_freq: 0
+initialisation_trial_metric: accuracy
+initialisation_trials: 1
+n_folds: 5
+output_dir: experiment_results
+random_seed: 42
+rule_elimination_percent: 0
+rule_extractor: Pedagogical
+rule_score_mechanism: Majority

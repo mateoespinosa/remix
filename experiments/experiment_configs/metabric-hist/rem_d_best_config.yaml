@@ -1,0 +1,69 @@
+dataset_file: datasets/MB-1004-GE-2Hist/data.csv
+dataset_name: MB-1004-GE-2Hist
+extractor_params:
+  block_size: 1
+  initial_drop_percent: null
+  intermediate_drop_percent: 0
+  merge_repeated_terms: false
+  min_cases: 10
+  num_workers: 1
+  preemptive_redundant_removal: false
+  rule_score_mechanism: Accuracy
+  threshold_decimals: null
+  top_k_activations: 1
+  trials: 1
+  winnow_features: true
+  winnow_intermediate: true
+force_rerun: null
+grid_search_params:
+  activations:
+  - tanh
+  - elu
+  batch_sizes:
+  - 16
+  - 32
+  dropout_rates:
+  - 0
+  - 0.2
+  enable: false
+  epochs:
+  - 50
+  - 100
+  - 150
+  layer_sizes:
+  - - 128
+    - 64
+    - 32
+  - - 64
+    - 32
+  learning_rates:
+  - 0.001
+  - 0.0001
+  loss_functions:
+  - softmax_xentr
+  - sigmoid_xentr
+  metric_name: accuracy
+hyperparameters:
+  activation: tanh
+  batch_size: 16
+  compress_mechanism: null
+  compression_params:
+    initial_sparsity: 0.0
+    pruning_epochs: 20
+    target_sparsity: 0.75
+  dropout_rate: 0.0
+  epochs: 50
+  last_activation: sigmoid
+  layer_units:
+  - 128
+  - 16
+  learning_rate: 0.001
+  loss_function: sigmoid_xentr
+initialisation_trial_metric: accuracy
+initialisation_trials: 1
+n_folds: 5
+output_dir: experiment_results
+random_seed: 42
+rule_elimination_percent: 0
+rule_extractor: REM-D
+rule_score_mechanism: Majority

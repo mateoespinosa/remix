@@ -1,0 +1,76 @@
+dataset_file: datasets/MiniBooNE/data.csv
+dataset_name: MiniBooNE
+evaluate_num_workers: 6
+extractor_params:
+  block_size: 3
+  ccp_prune: true
+  estimators: 5
+  initial_drop_percent: null
+  intermediate_drop_percent: 0
+  max_number_of_samples: null
+  merge_repeated_terms: false
+  min_cases: 15
+  min_confidence: 0
+  num_workers: 1
+  preemptive_redundant_removal: false
+  rule_score_mechanism: Accuracy
+  threshold_decimals: null
+  top_k_activations: 1
+  tree_extraction_algorithm_name: C5.0
+  trials: 1
+  winnow_features: true
+  winnow_intermediate: true
+force_rerun: null
+grid_search_params:
+  activations:
+  - tanh
+  - elu
+  batch_sizes:
+  - 16
+  - 32
+  dropout_rates:
+  - 0
+  - 0.2
+  enable: false
+  epochs:
+  - 50
+  - 100
+  - 150
+  layer_sizes:
+  - - 128
+    - 64
+    - 32
+  - - 64
+    - 32
+  learning_rates:
+  - 0.001
+  - 0.0001
+  loss_functions:
+  - softmax_xentr
+  - sigmoid_xentr
+  metric_name: accuracy
+hyperparameters:
+  activation: elu
+  batch_size: 32
+  compress_mechanism: null
+  compression_params:
+    initial_sparsity: 0.0
+    pruning_epochs: 20
+    target_sparsity: 0.75
+  dropout_rate: 0.0
+  epochs: 50
+  last_activation: softmax
+  layer_units:
+  - 128
+  - 64
+  - 32
+  learning_rate: 0.001
+  loss_function: softmax_xentr
+initialisation_trial_metric: accuracy
+initialisation_trials: 1
+n_folds: 5
+output_dir: experiment_results
+random_seed: 42
+rule_elimination_percent: 0
+rule_extractor: Pedagogical
+rule_score_mechanism: Majority
