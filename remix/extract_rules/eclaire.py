@@ -42,6 +42,7 @@ def extract_rules(
     min_cases=15,
     intermediate_end_min_cases=None,
     initial_min_cases=None,
+    ecclectic_min_cases=None,
     num_workers=1,
     feature_names=None,
     output_class_names=None,
@@ -181,8 +182,6 @@ def extract_rules(
 
     :returns Ruleset: the set of rules extracted from the given model.
     """
-
-
     # First determine which rule extraction algorithm we will use in this
     # setting
     if final_algorithm_name.lower() in ["c5.0", "c5", "see5"]:
@@ -197,9 +196,10 @@ def extract_rules(
         final_algo_kwargs = dict(
             threshold_decimals=threshold_decimals,
             ccp_prune=ccp_prune,
-            class_weight="balanced",
             max_depth=final_tree_max_depth,
         )
+        if balance_classes:
+            final_algo_kwargs["class_weight"] = "balanced"
     elif final_algorithm_name.lower() == "random_forest":
         final_algo_call = random_forest_rules
         final_algo_kwargs = dict(
@@ -235,6 +235,8 @@ def extract_rules(
             regression=regression,
             max_depth=intermediate_tree_max_depth,
         )
+        if balance_classes:
+            intermediate_algo_kwargs["class_weight"] = "balanced"
     elif intermediate_algorithm_name.lower() == "random_forest":
         intermediate_algo_call = random_forest_rules
         intermediate_algo_kwargs = dict(
@@ -332,12 +334,15 @@ def extract_rules(
             block_idx,
             pbar=None,
         ):
-            slope = (intermediate_end_min_cases - initial_min_cases)
-            slope = slope/(len(input_hidden_acts) - 1)
-            eff_min_cases = intermediate_end_min_cases - (
-                slope * block_idx
-            )
-            if intermediate_end_min_cases > 1:
+            if len(input_hidden_acts) > 1:
+                slope = (intermediate_end_min_cases - initial_min_cases)
+                slope = slope/(len(input_hidden_acts) - 1)
+                eff_min_cases = intermediate_end_min_cases - (
+                    slope * block_idx
+                )
+            else:
+                eff_min_cases = intermediate_end_min_cases
+            if intermediate_end_min_cases >= 1:
                 # Then let's make sure we pass an int
                 eff_min_cases = int(np.ceil(eff_min_cases))
 
@@ -479,7 +484,7 @@ def extract_rules(
                 layer_index=0,
             ),
             y=y_predicted,
-            min_cases=min_cases,
+            min_cases=(ecclectic_min_cases or min_cases),
             prior_rule_confidence=1,
             rule_conclusion_map=class_rule_conclusion_map,
             **intermediate_algo_kwargs
