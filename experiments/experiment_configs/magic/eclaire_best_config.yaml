@@ -74,5 +74,5 @@ n_folds: 5
 output_dir: experiment_results
 random_seed: 42
 rule_elimination_percent: 0
-rule_extractor: eREM-D
+rule_extractor: eclaire
 rule_score_mechanism: Majority

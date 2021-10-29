@@ -78,5 +78,5 @@ output_dir: experiment_results
 percent_test_data: 0.05
 random_seed: 42
 rule_elimination_percent: 0
-rule_extractor: eREM-D
+rule_extractor: eclaire
 rule_score_mechanism: Majority
