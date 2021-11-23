@@ -1,13 +1,20 @@
 # REMIX: Rule Extraction Methods for Interactive eXplainability
-Main repository for work our work with rule extraction methods from Deep Neural
-Networks (DNNs). This repository exposes a variety of methods for extracting
-rule sets from trained DNNs and a set of visualization tools for inspecting and
-using extracted rule sets.
+
+This repository contains a variety of tools and methods for extracting
+interpretable rule-based models from Deep Neural Networks (DNNs). These models
+aim to increase the visibility, debuggability, and transparency of a DNN's
+predictions by constructing rule sets that are able to approximate the DNN's
+decision boundary with high fidelity. In REMIX, we include and discuss several
+rule extraction methods, including our own algorithm [ECLAIRE](https://xai4debugging.github.io/files/papers/efficient_decompositional_rule.pdf), and expose
+a set of visualization tools for inspecting and using extracted rule sets. For
+details on the specific algorithms we include in this repository, please see our
+"**Supported Rule Extraction Methods**" section or take a look at the
+[work we presented at NeurIPS 2021](https://xai4debugging.github.io/files/papers/efficient_decompositional_rule.pdf) (XAI4Debugging Workshop).
 
 ## Credits
 
 A lot of the code in this project is based on the work by Shams et al. made
-publicly available at [https://github.com/ZohrehShams/IntegrativeRuleExtractionMethodology](https://github.com/ZohrehShams/IntegrativeRuleExtractionMethodology)
+[publicly available](https://github.com/ZohrehShams/IntegrativeRuleExtractionMethodology)
 as part of their publication ["REM: An Integrative Rule Extraction Methodology
 for Explainable Data Analysis in Healthcare"](https://www.biorxiv.org/content/10.1101/2021.01.22.427799v2.abstract).
 
@@ -59,7 +66,7 @@ Currently, we support the following algorithms for extracting rule sets from
 DNNs:
 1. [DeepRED](https://link.springer.com/chapter/10.1007/978-3-319-46307-0_29) (Zilke et al. 2016): We support a variation of the DeepRED algorithm in which we use C5.0 rather than C4.5 for intermediate rule extraction. This results in generally better and smaller rule sets than those extracted by the original DeepRED algorithm.
 2. [REM-D](https://www.biorxiv.org/content/10.1101/2021.01.22.427799v2.abstract) (Shams et al. 2020): This implementation is based on the original REM-D implementation by Shams et al. but includes several optimizations including multi-threading.
-3. ECLAIRE (Espinosa Zarlenga et al. 2021, work under review): Efficient CLAuse-wIse Rule Extraction allows you to extract rules from a DNN in a much more scalable way than REM-D/DeepRED while generally producing better performing and smaller rule sets. If working with large models or training sets, we strongly recommend using this method over REM-D or DeepRED as otherwise you may be prone to getting intractable runtimes in complex models.
+3. [ECLAIRE](https://xai4debugging.github.io/files/papers/efficient_decompositional_rule.pdf) (Espinosa Zarlenga et al. 2021): Efficient CLAuse-wIse Rule Extraction allows you to extract rules from a DNN in a much more scalable way than REM-D/DeepRED while generally producing better performing and smaller rule sets. If working with large models or training sets, we strongly recommend using this method over REM-D or DeepRED as otherwise you may be prone to getting intractable runtimes in complex models.
 4. PedC5.0 (Kola et al. 2020, University of Cambridge Part II Dissertation): Simple pedagogical rule extraction method in which C5.0 is used to approximate the output of a DNN using its input features.
 5. [REM-T](https://www.biorxiv.org/content/10.1101/2021.01.22.427799v2.abstract) (Shams et al. 2020): This method allows you to extract rule sets from random forests or plain decision trees trained on a given task. As opposed to all other methods, this algorithm does not require a DNN and instead requires true labels for its training samples.
 
@@ -171,11 +178,13 @@ also giving you an explicit text view of every rule in this rule set.
 
 
 ## Running Experiments
-For our experiments we will use the data located in
-https://github.com/sumaiyah/DNN-RE-data and you can find all our code in the
-`experiments/` directory of this repository. You can run recreate several of our
-cross-validation experiments using the provided executable `run_experiment.py`
-which offers the following options:
+To recreate all the experiments we present in our [ECLAIRE paper](https://xai4debugging.github.io/files/papers/efficient_decompositional_rule.pdf), you will
+need to download the data located in [here](https://github.com/sumaiyah/DNN-RE-data), as well as some of the data we
+have included in this repository under `remix/experiments/datasets/`. All of
+the code needed for running a given experiment can be found in the
+`remix/experiments/` directory of this repository. To recreate the results
+obtained in any of our cross-validation experiments, you may use the provided
+executable `run_experiment.py` which offers the following options:
 ```bash
 $python run_experiment.py --help
 usage: run_experiment.py [-h] [--config file.yaml] [--n_folds N]
@@ -233,7 +242,10 @@ optional arguments:
                         itself.
 ```
 
-One can run the tool by manually inputing the dataset information as command-line arguments or by providing a YAML config containing the experiment parameterization as the following example:
+One can run the tool by manually inputting the dataset information as
+command-line arguments or by providing a YAML config containing the experiment
+parameterization as the following example:
+
 ```yaml
 # The directory of our training data. Can be a path relative to the caller or
 # an absolute path.
@@ -540,7 +552,7 @@ grid_search_params:
 In this example, we are indicating the path where we are we storing our
 `XOR` dataset and what hyper-parameters we want to use for our neural network.
 
-You can then use this to run the experiment as follows:
+You can then use this command to run the experiment:
 ```bash
 python run_experiment.py --config experiment_config.yaml
 ```
@@ -592,13 +604,13 @@ The default cross-validation experiment will do the following:
   1. Split our dataset into training/test datasets and further split our training data into the number of requested folds.
   2. Train one neural network for each fold of data.
   3. Extract rules for each neural network we trained.
-  4. Compare the performance of the neural network and the extracted ruleset in our test data.
+  4. Compare the performance of the neural network and the extracted rule set in our test data.
   5. Dump all the results, statistics, and details of the experiment in the provided directory following the file hierarchy described below.
 
 If the output directory exists and contains data from a previous run, our runner
 will attempt to reuse it as much as possible to avoid recomputing things. If you
 do not want that behavior, please make sure to use different directories for
-different runs or call the script with the `-f` flag in it.
+different runs or call the script with the `-f` flag on.
 
 Please note that if a configuration file is provided and command-line arguments
 are also provided, then the ones given in the command-line will always take
@@ -606,6 +618,7 @@ precedence over their counterparts in the config file. The intent of this
 behavior is to speed up different iterations in experiments.
 
 ### Experiment Folder structure
+
 Once an experiment is instantiated, we will generate a file structure containing
 all the results of the experiment as follows:
 ```markdown
@@ -649,11 +662,12 @@ To recreate any of the results reported this dissertation, you can call
 ```bash
 python run_experiment.py --config experiment_configs/<dataset_name>/<method_name>_best_config.yaml
 ```
-from the `experiments/` directory and that should generate the results reported
-in our paper (up to possible some small marginal differences due to
-non-determinism).
+from the `remix/experiments/` directory and that should generate the results
+reported in our [paper](https://xai4debugging.github.io/files/papers/efficient_decompositional_rule.pdf) (up to possible some small marginal differences due
+to non-determinism).
 
 ## Tests
+
 We have also included a simple test that verifies the basic functionality of all
 the main tools and methods we introduce in this codebase. This testing suite is
 no way comprehensive but it helps making sure the main pathways are at least
