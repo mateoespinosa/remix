@@ -21,7 +21,11 @@ def stratified_k_fold_split(
     if y is None:
         # Then simply subsample X
         num_samples = np.floor(test_size * X.shape[0])
-        selected_rows = np.choice(X.shape[0], size=num_samples, replace=False)
+        selected_rows = np.random.choice(
+            X.shape[0],
+            size=num_samples,
+            replace=False,
+        )
         return X[selected_rows, :]
 
     if (n_folds == 1) or regression:

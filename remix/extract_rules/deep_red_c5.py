@@ -7,12 +7,13 @@ import dill
 import logging
 import numpy as np
 
+from multiprocessing import Pool
 from remix.logic_manipulator.substitute_rules import substitute
 from remix.rules.C5 import C5
+from remix.rules.cart import cart_rules, random_forest_rules
 from remix.rules.rule import Rule
 from remix.rules.ruleset import Ruleset
 from remix.utils.parallelism import serialized_function_execute
-from multiprocessing import Pool
 from tqdm import tqdm  # Loading bar for rule generation
 
 from .utils import ModelCache
@@ -36,6 +37,11 @@ def extract_rules(
     output_class_names=None,
     trials=1,
     block_size=1,
+    intermediate_algorithm_name="C5.0",
+    estimators=30,
+    ccp_prune=True,
+    balance_classes=False,
+    intermediate_tree_max_depth=None,
     **kwargs,
 ):
     """
@@ -90,7 +96,39 @@ def extract_rules(
 
     :returns Ruleset: the set of rules extracted from the given model.
     """
-    # First we will instantiate a cache of our given keras model to obtain all
+
+    # First find out which algorithm to use for rule extraction
+    if intermediate_algorithm_name.lower() in ["c5.0", "c5", "see5"]:
+        intermediate_algo_call = C5
+        intermediate_algo_kwargs = dict(
+            winnow=winnow_intermediate,
+            threshold_decimals=threshold_decimals,
+            trials=trials,
+        )
+    elif intermediate_algorithm_name.lower() == "cart":
+        intermediate_algo_call = cart_rules
+        intermediate_algo_kwargs = dict(
+            threshold_decimals=threshold_decimals,
+            ccp_prune=ccp_prune,
+            max_depth=intermediate_tree_max_depth,
+        )
+        if balance_classes:
+            intermediate_algo_kwargs["class_weight"] = "balanced"
+    elif intermediate_algorithm_name.lower() == "random_forest":
+        intermediate_algo_call = random_forest_rules
+        intermediate_algo_kwargs = dict(
+            threshold_decimals=threshold_decimals,
+            estimators=estimators,
+            max_depth=intermediate_tree_max_depth,
+        )
+    else:
+        raise ValueError(
+            f'Unsupported tree extraction algorithm '
+            f'{intermediate_algorithm_name}. Supported algorithms are '
+            '"C5.0", "CART", and "random_forest".'
+        )
+
+    # Then we will instantiate a cache of our given keras model to obtain all
     # intermediate activations
     cache_model = ModelCache(
         keras_model=model,
@@ -203,6 +241,15 @@ def extract_rules(
                         threshold_decimals=threshold_decimals,
                         min_cases=min_cases,
                         trials=trials,
+                    )
+
+                    new_rules = intermediate_algo_call(
+                        x=predictors,
+                        y=target,
+                        rule_conclusion_map=rule_conclusion_map,
+                        prior_rule_confidence=prior_rule_confidence,
+                        min_cases=min_cases,
+                        **intermediate_algo_kwargs,
                     )
                     if pbar:
                         pbar.update(1/num_terms)

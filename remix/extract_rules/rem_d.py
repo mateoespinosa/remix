@@ -7,6 +7,7 @@ import numpy as np
 
 from remix.logic_manipulator.substitute_rules import substitute
 from remix.rules.C5 import C5
+from remix.rules.cart import cart_rules, random_forest_rules
 from remix.rules.rule import Rule
 from remix.rules.ruleset import Ruleset
 from remix.utils.data_handling import stratified_k_fold_split
@@ -37,6 +38,11 @@ def extract_rules(
     block_size=1,  # 1 for original
     merge_repeated_terms=False,  # False for original
     max_number_of_samples=None,
+    intermediate_algorithm_name="C5.0",
+    estimators=30,
+    ccp_prune=True,
+    balance_classes=False,
+    intermediate_tree_max_depth=None,
     **kwargs,
 ):
     """
@@ -90,6 +96,37 @@ def extract_rules(
 
     :returns Ruleset: the set of rules extracted from the given model.
     """
+
+    # First find out which algorithm to use for rule extraction
+    if intermediate_algorithm_name.lower() in ["c5.0", "c5", "see5"]:
+        intermediate_algo_call = C5
+        intermediate_algo_kwargs = dict(
+            winnow=winnow_intermediate,
+            threshold_decimals=threshold_decimals,
+            trials=trials,
+        )
+    elif intermediate_algorithm_name.lower() == "cart":
+        intermediate_algo_call = cart_rules
+        intermediate_algo_kwargs = dict(
+            threshold_decimals=threshold_decimals,
+            ccp_prune=ccp_prune,
+            max_depth=intermediate_tree_max_depth,
+        )
+        if balance_classes:
+            intermediate_algo_kwargs["class_weight"] = "balanced"
+    elif intermediate_algorithm_name.lower() == "random_forest":
+        intermediate_algo_call = random_forest_rules
+        intermediate_algo_kwargs = dict(
+            threshold_decimals=threshold_decimals,
+            estimators=estimators,
+            max_depth=intermediate_tree_max_depth,
+        )
+    else:
+        raise ValueError(
+            f'Unsupported tree extraction algorithm '
+            f'{intermediate_algorithm_name}. Supported algorithms are '
+            '"C5.0", "CART", and "random_forest".'
+        )
 
     # Determine whether we want to subsample our training dataset to make it
     # more scalable or not
@@ -219,18 +256,13 @@ def extract_rules(
                         True: term,
                         False: term.negate(),
                     }
-                    new_rules = C5(
+                    new_rules = intermediate_algo_call(
                         x=predictors,
                         y=target,
                         rule_conclusion_map=rule_conclusion_map,
                         prior_rule_confidence=prior_rule_confidence,
-                        winnow=(
-                            winnow_intermediate if hidden_layer
-                            else winnow_features
-                        ),
-                        threshold_decimals=threshold_decimals,
                         min_cases=min_cases,
-                        trials=trials,
+                        **intermediate_algo_kwargs,
                     )
 
                     if pbar:
